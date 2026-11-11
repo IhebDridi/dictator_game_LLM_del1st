@@ -6,16 +6,15 @@ import re
 class ChatGPTPage(Page):
 
     """ Page where users interact with ChatGPT in real-time """
-    form_model = 'player'  # ✅ Required for form submission
+    form_model = 'player'
     form_fields = []
 
 
     def is_displayed(self):
         """ Ensure ChatGPTPage runs for each round in the part """
         current_part = Constants.get_part(self.round_number)
-        display_round = (self.round_number - 1) % Constants.rounds_per_part + 1  # ✅ Get round within part
+        display_round = (self.round_number - 1) % Constants.rounds_per_part + 1
 
-        # ✅ Show ChatGPTPage for each round in Part 2 or Part 3 (if delegation is chosen)
         return (current_part == 1 or (current_part == 3 and self.player.delegate_decision_optional)) and (display_round -1) % Constants.rounds_per_part ==0
     def vars_for_template(self):
         current_part = Constants.get_part(self.round_number)
@@ -25,7 +24,6 @@ class ChatGPTPage(Page):
         
     def before_next_page(self):
         chatgpt_final_response=self.get_final_assistant_response()
-        #c$#"
         self.save_allocations_to_future_rounds(chatgpt_final_response)
         print('Saved Allocations from AI Assistant')
         
@@ -54,22 +52,19 @@ class ChatGPTPage(Page):
 
     def save_allocations_to_future_rounds(self, chatgpt_final_response):
     
-        allocation_values = chatgpt_final_response.split(',')  # ✅ Split ChatGPT response into list
+        allocation_values = chatgpt_final_response.split(',')
         print('Last GPT Response: ',allocation_values)
         try:
-            # ✅ Ensure we have exactly 10 allocations (Rounds 10 to 20)
             if len(allocation_values) < 10:
                 print("⚠️ ChatGPT did not return 10 allocations, skipping storage.")
                 return
 
             round_number=self.round_number
             print('Ongoing Round: ',round_number)
-            for i in range(1,11):  # ✅ Loop for 10 rounds (rounds 10-20)
-                # ✅ Fetch player object for the future round
+            for i in range(1,11):
                 future_player = self.player.in_round(round_number)
                 self.round_number=round_number
 
-                # ✅ Store allocation in the correct round
                 future_player.allocation = int(allocation_values[i-1].strip())
                 print(f"✅ Saved allocation {future_player.allocation} for Round {round_number}")
                 round_number = round_number + 1
@@ -83,28 +78,20 @@ class ChatGPTPage(Page):
         if self.assistant_id:
 
             """ Handles real-time chat interaction via WebSockets """
-            self.participant.vars['alert_message']="" #test alert removal
-            user_message = data['message']  # Get user input
+            self.participant.vars['alert_message']=""
+            user_message = data['message']
             print("recieved user message")
-            # Load existing conversation history
-            #conversation = json.loads(self.conversation_history)
             conversation = [{"role": "system", "content": "Hi! I am your allocation assistant."}]
-            # Append user's message
             conversation.append({"role": "user", "content": user_message})
 
-            # Get AI response
             print("Sending user message to CHATGPT")
             chatgpt_response = chatbot_assistant.send_message(user_message)
             print('ChatGPT response:',chatgpt_response)
             allocation_values = chatgpt_response.split(',')
 
             conversation.append( {"role": "assistant", "content": chatgpt_response})
-            # Save conversation history
             self.conversation_history = json.dumps(conversation)
 
-            # Send response back to the frontend
-            #send_rec_msg={self.id_in_group: {"message": user_message, "response": chatgpt_response}}
-            #print('Sending back the msg to HTML: ',chatgpt_response)
             return {self.id_in_group: {"response": chatgpt_response}}
     
 
@@ -112,12 +99,12 @@ class InformedConsent(Page):
     form_model = 'player'
     form_fields = ['prolific_id']
     def is_displayed(self):
-        return self.round_number == 1  # Show only once at the beginning
+        return self.round_number == 1
 
 
 class Introduction(Page):
     def is_displayed(self):
-        return self.round_number == 1  # Show only once at the beginning
+        return self.round_number == 1
 
 
 class ComprehensionTest(Page):
@@ -166,9 +153,6 @@ class FailedTest(Page):
         return self.player.is_excluded
 
 
-# -------------------------
-#  Per-Part Instructions
-# -------------------------
 
 class Instructions(Page):
     def is_displayed(self):
@@ -185,24 +169,16 @@ class Instructions(Page):
         }
 
 
-# -------------------------
-#  Agent Programming
-# -------------------------
 
-#  Decision Making
-# -------------------------
 
 class Decision(Page):
     form_model = 'player'
     form_fields = ['allocation']
-    #timeout_seconds = 20
 
  
 
     def is_displayed(self):
         current_part = Constants.get_part(self.round_number)
-        # Show Decision page only if not in Part 2 and not using optional delegation in Part 3
-        #return not (current_part == 2 or (current_part == 3 and self.player.delegate_decision_optional))
         return not (current_part == 1 or (current_part == 3 and self.player.delegate_decision_optional))
     
 
@@ -238,36 +214,31 @@ class Decision(Page):
         current_part = Constants.get_part(self.round_number)
         display_round = (self.round_number - 1) % Constants.rounds_per_part + 1
 
-        if current_part == 2  :  # Part 1 logic or Part 3 with manual with manual decisions and timer
+        if current_part == 2  :
             if self.timeout_happened or self.player.allocation is None:
-                # Assign random allocation if timer expires
                 self.player.allocation = random.randint(0, 100)
                 self.participant.vars['alert_message'] = (
                     f"You did not make a choice, so {self.player.allocation} was chosen for you. "
                 )
                 self.player.random_decisions = True
             else:
-                # Clear the alert message if no timeout occurred
                 self.participant.vars['alert_message'] = None
                 self.player.random_decisions = False
-            # Update decisions for the current round
 
 
 
-        elif current_part == 1:  # Mandatory delegation
+        elif current_part == 1:
             self.player.allocation = self.player.get_agent_decision_mandatory(display_round)
             self.participant.vars['alert_message'] = ""
             self.player.random_decisions = True
 
-        elif current_part == 3 and self.player.delegate_decision_optional:  # Optional delegation
+        elif current_part == 3 and self.player.delegate_decision_optional:
             self.player.allocation = self.player.get_agent_decision_optional(display_round)
             self.participant.vars['alert_message'] = ""
             self.player.random_decisions = True
         
-        elif current_part == 3 and not self.player.delegate_decision_optional:  # Optional delegation
-            #self.player.allocation = self.player.get_agent_decision_optional(display_round)
+        elif current_part == 3 and not self.player.delegate_decision_optional:
             if self.timeout_happened or self.player.allocation is None:
-                # Assign random allocation if timer expires
                 self.player.allocation = random.randint(0, 100)
                 self.participant.vars['alert_message'] = (
                     f"You did not make a choice, so {self.player.allocation} was chosen for you. "
@@ -275,7 +246,6 @@ class Decision(Page):
                 self.player.random_decisions = True
 
             else:
-                # Clear the alert message if no timeout occurred
                 self.participant.vars['alert_message'] = ''
                 self.player.random_decisions = False
             
@@ -285,21 +255,16 @@ class Decision(Page):
         print(f"round:{self.round_number}  self.player.allocation: {self.player.allocation}")
 
 
-# -------------------------
-#  Delegation Decision
-# -------------------------
 
 class DelegationDecision(Page):
     form_model = 'player'
     form_fields = ['delegate_decision_optional']
 
     def is_displayed(self):
-        # Show only at the start of Part 3
 
         return Constants.get_part(self.round_number) == 3 and (self.round_number - 1) % Constants.rounds_per_part == 0
 
     def before_next_page(self):
-        # Save the decision for all rounds in Part 3
         if Constants.get_part(self.round_number) == 3:
             part_rounds = self.player.in_rounds(
                 (Constants.get_part(self.round_number) - 1) * Constants.rounds_per_part + 1,
@@ -310,9 +275,6 @@ class DelegationDecision(Page):
 
 
 
-# -------------------------
-#  Results
-# -------------------------
 
 class Results(Page):
     def is_displayed(self):
@@ -326,7 +288,6 @@ class Results(Page):
             is_delegation=False
         else: 
             is_delegation=  self.player.field_maybe_none('delegate_decision_optional')
-        #decisions = json.loads(self.player.random_decisions)
 
         player  = self.player
         rounds_data = []
@@ -336,7 +297,7 @@ class Results(Page):
                 current_part     * Constants.rounds_per_part + 1
         ):
             rr         = player.in_round(r)
-            allocation = rr.field_maybe_none('allocation') or 0   # 0 if None
+            allocation = rr.field_maybe_none('allocation') or 0
             rounds_data.append({
                 'round'     : r - (current_part - 1) * Constants.rounds_per_part,
                 'kept'      : 100 - allocation,
@@ -351,9 +312,6 @@ class Results(Page):
         )
 
 
-# -------------------------
-#  Debriefing
-# -------------------------
 
 
 class Debriefing(Page):
@@ -371,7 +329,6 @@ class Debriefing(Page):
         round_number=self.round_number
         random_payoff_part=random.randint(1,3)
 
-        # Loop through parts (1, 2, 3)
         for part in range(1, 4):
             part_data = []
             for round_number in range(
@@ -394,7 +351,6 @@ class Debriefing(Page):
         }
 
 
-        # Check if agent allocation was chosen in part 3
         agent_allocation_chosen = self.player.field_maybe_none('delegate_decision_optional')
         if self.player.field_maybe_none('random_payoff_part') == None: 
             random_payoff_part=self.random_payoff_selection()
@@ -442,12 +398,12 @@ class Debriefing(Page):
 class ExitQuestionnaire(Page):
     form_model = 'player'
     form_fields = [
-        'gender',           # Male / Female / Non-binary / Prefer not to say
-        'age',              # 18 – 100
-        'occupation',       # free text ≤ 100 chars
-        'ai_use',           # frequency scale
-        'task_difficulty',  # difficulty scale
-        'feedback',         # optional free text ≤ 1000 chars
+        'gender',
+        'age',
+        'occupation',
+        'ai_use',
+        'task_difficulty',
+        'feedback',
     ]
 
     def is_displayed(self):
@@ -456,7 +412,6 @@ class ExitQuestionnaire(Page):
 
 class Thankyou(Page):
 
-    # the Prolific completion link
 
     def vars_for_template(self):
         prolific_url = 'https://bsky.app/profile/iterrucha.bsky.social'
@@ -468,22 +423,18 @@ class Thankyou(Page):
 
 
 
-# -------------------------
-#  Page Sequence
-# -------------------------
-#page_sequence=[ChatGPTPage]
 
 page_sequence = [
-    InformedConsent,        # Only at the beginning
-    Introduction,           # Only at the beginning
-    ComprehensionTest,      # Only at the beginning
-    FailedTest,             # If excluded after failing comprehension test
-    Instructions,           # Once at the start of each part
-    DelegationDecision,     # At the start of Part 3 to choose delegation
-    ChatGPTPage,            # ChatGPTPage for Part 2 or optional delegation in Part 3
-    Decision,               # Decision page for Part 1 and manual decisions in Part 3
-    Results,                # Reusable for all parts
-    Debriefing,             # At the end or if excluded
+    InformedConsent,
+    Introduction,
+    ComprehensionTest,
+    FailedTest,
+    Instructions,
+    DelegationDecision,
+    ChatGPTPage,
+    Decision,
+    Results,
+    Debriefing,
     ExitQuestionnaire,
     Thankyou,
 ]

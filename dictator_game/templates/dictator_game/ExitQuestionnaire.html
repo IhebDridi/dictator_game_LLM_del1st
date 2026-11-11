@@ -8,7 +8,6 @@
 
     <form method="post" class="test-form">
 
-        {# Show any global form errors #}
         {% if form.errors %}
         <ul class="errorlist global-error">
             {% for field, errs in form.errors.items %}

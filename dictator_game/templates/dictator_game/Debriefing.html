@@ -28,7 +28,7 @@
                 <tbody>
                 {% for result in part_data %}
                     <tr>
-                        <td>{{ forloop.counter }}</td> <!-- Display relative round number (1 to 10) -->
+                        <td>{{ forloop.counter }}</td> 
                         <td>{{ result.allocated }}</td>
                         <td>{{ result.kept }}</td>
                     </tr>
@@ -61,16 +61,15 @@
 
 
 <style>
-/* General Styling */
 #continue-btn {
     margin-top: 30px;
-    background-color: #28a745;          /* green */
+    background-color: #28a745;          
 }
 #continue-btn:hover {
     background-color: #1e7e34;
 }
 .highlight-payoff {
-    border: 3px solid #ff9800; /* Orange border to highlight */
+    border: 3px solid #ff9800; 
     box-shadow: 0 0 15px rgba(255, 152, 0, 0.5);
 }
 
@@ -92,17 +91,15 @@ body {
     border-radius: 8px;
 }
 
-/* Title Styling */
 .main-title {
     font-size: 30px;
-    color: #333333; /* Blackish color */
+    color: #333333; 
     text-align: center;
     margin-bottom: 20px;
-    border-bottom: 3px solid #0056b3; /* Adds a subtle contrast line */
+    border-bottom: 3px solid #0056b3; 
     padding-bottom: 10px;
 }
 
-/* Tables Container */
 .tables-container {
     display: flex;
     justify-content: space-around;
@@ -111,7 +108,6 @@ body {
     margin-top: 20px;
 }
 
-/* Table Wrapper Styling */
 .table-wrapper {
     background: #f7f9fa;
     padding: 15px 20px;
@@ -123,7 +119,6 @@ body {
     text-align: center;
 }
 
-/* Table Header */
 .table-header {
     margin-bottom: 10px;
 }
@@ -134,7 +129,6 @@ body {
     font-weight: bold;
 }
 
-/* Table Styling */
 .styled-table {
     border-collapse: collapse;
     width: 100%;
@@ -161,7 +155,6 @@ body {
     background-color: #f1f1f1;
 }
 
-/* Summary Note */
 .summary-note {
     margin-top: 20px;
     font-size: 16px;
@@ -169,7 +162,6 @@ body {
     color: #555555;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     .tables-container {
         flex-direction: column;

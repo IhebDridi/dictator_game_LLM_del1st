@@ -1,9 +1,9 @@
 {% extends "global/Page.html" %}
 {% block content %}
-<!-- Container -->
-<!-- Container -->
+
+
 <div class="main-container">
-    <!-- Chat Container -->
+    
 
     <div class="chat-container">
             <h1 class="main-title">
@@ -22,7 +22,7 @@
             </div>
 
     
-        <!-- Loading Indicator -->
+        
             <div id="loading-indicator" style="text-align: center; display: none;">
                 <span class="material-symbols-outlined">hourglass_empty</span> Fetching response...
             </div>
@@ -31,7 +31,7 @@
 
 
 
-    <!-- Results Container -->
+    
     <div class="results-container">
         <h3 class="main-title">AI Agent Behavior</h3>
         <div class="table-container">
@@ -43,7 +43,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Pre-fill table with rounds and '-' -->
+                    
                     <script>
                         document.addEventListener("DOMContentLoaded", function() {
                             let allocationTable = document.getElementById("allocation-table").getElementsByTagName('tbody')[0];
@@ -67,7 +67,7 @@
 
 
     function sendMessage() {
-        if (event) event.preventDefault();  // Prevent default form submission
+        if (event) event.preventDefault();  
 
         let inputField = document.getElementById("user-input");
         let message = inputField.value.trim();
@@ -76,14 +76,12 @@
         let chatBox = document.getElementById("chat-box");
         let loadingIndicator = document.getElementById("loading-indicator");
 
-        // ✅ Display user message before sending
         let userMsg = document.createElement("p");
         userMsg.innerHTML = `<span class="material-symbols-outlined">face</span> <strong>You:</strong> ${message}`;
         chatBox.appendChild(userMsg);
 
-        // ✅ Clear input field after displaying the message
         inputField.value = "";
-        loadingIndicator.style.display = "block"; // Show loading indicator
+        loadingIndicator.style.display = "block"; 
 
         
 
@@ -107,7 +105,7 @@
         if (pattern.test(data.response))
         {
             if (confirmBtn) {
-            confirmBtn.style.display = "block"; // or "block" if you prefer full-width
+            confirmBtn.style.display = "block"; 
                             }
 
         }
@@ -122,20 +120,18 @@
         let allocationTable = document.getElementById("allocation-table").getElementsByTagName('tbody')[0];
         let loadingIndicator = document.getElementById("loading-indicator");
 
-        loadingIndicator.style.display = "none"; // Hide loading indicator
+        loadingIndicator.style.display = "none"; 
 
         if (!chatBox || !allocationTable) {
             console.error("Chat box or allocation table not found!");
             return;
         }
 
-        // ✅ Display ChatGPT response
         if (data.response) {
             let botMsg = document.createElement("p");
             botMsg.innerHTML = `<span class="material-symbols-outlined">robot_2</span> <strong>ChatGPT:</strong> ${data.response}`;
             chatBox.appendChild(botMsg);
 
-            // ✅ Update table with new allocations
             let allocations = data.response.split(',').map(val => val.trim());
             if (allocations.length === 10) {
                 for (let i = 0; i < 10; i++) {
@@ -144,7 +140,6 @@
             }
         }
 
-        // ✅ Adjust chat box height to match results container
         let chatContainer = document.querySelector(".chat-container");
         let resultsContainer = document.querySelector(".results-container");
         chatContainer.style.height = `${resultsContainer.offsetHeight}px`;
@@ -181,7 +176,6 @@
     justify-content: flex-start;
     gap: 20px;
     width: 1200px;
-     /* Added left padding to shift elements left */
 }
 .results-container {
     flex: 1;
@@ -205,7 +199,7 @@
     display: flex;
     align-items: center;
     width: 100%;
-    margin-top: 10px; /* Added margin to push input field down */
+    margin-top: 10px; 
 
 
 }
@@ -224,7 +218,7 @@
     position: fixed;
     top: 20px;
     right: 20px;
-    background-color: #f44336; /* Bright red background */
+    background-color: #f44336; 
     color: white;
     padding: 15px 20px;
     border-radius: 8px;

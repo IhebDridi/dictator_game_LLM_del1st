@@ -10,19 +10,16 @@ class ChatGPTAssistant:
         openai.api_key = settings.OPENAI_API_KEY
         self.model = settings.openai_model
         self.assistant_id = None
-        self.thread_id = None  # Each user will have a different thread
+        self.thread_id = None
 
-        # Load instructions from a file
         self.instructions = self.load_instructions(settings.instructions_path)
 
-        # Create or load the assistant
         self.create_or_load_assistant()
 
     def load_instructions(self, file_path):
         """Reads the assistant's instructions from a file."""
         try:
             with open(file_path, "r", encoding="utf-8") as f:
-                #print('Instructions: ', f.read().strip())
                 return f.read().strip()
         except FileNotFoundError:
             print('Could not find instructions file')
@@ -31,9 +28,8 @@ class ChatGPTAssistant:
     def create_or_load_assistant(self):
         """Creates an OpenAI assistant if it doesn't already exist."""
         if self.assistant_id:
-            return self.assistant_id  # Return existing ID
+            return self.assistant_id
 
-        # Create a new assistant
         assistant = openai.beta.assistants.create(
             name="Dictator Game Assistant",
             instructions=self.instructions,
@@ -42,14 +38,12 @@ class ChatGPTAssistant:
 
         self.assistant_id = assistant.id
         print(f"✅ Assistant Created: {self.assistant_id}")
-        #assistant = openai.beta.assistants.retrieve(self.assistant_id)
-        #print("✅ Assistant Instructions:", assistant.instructions)
         return self.assistant_id
 
     def create_thread(self):
         """Creates a new thread to maintain conversation memory."""
         if self.thread_id:
-            return self.thread_id  # Return existing thread
+            return self.thread_id
 
         thread = openai.beta.threads.create()
         self.thread_id = thread.id
@@ -58,9 +52,8 @@ class ChatGPTAssistant:
 
     def send_message(self, user_message):
         """Sends a user message and gets a response from the assistant."""
-        self.create_thread()  # Ensure a thread exists
+        self.create_thread()
 
-        # Send user message to the thread
         openai.beta.threads.messages.create(
             thread_id=self.thread_id,
             role="user",
@@ -68,17 +61,14 @@ class ChatGPTAssistant:
         )
         assistant = openai.beta.assistants.retrieve(self.assistant_id)
         print("✅ Assistant Instructions:", assistant.instructions)
-        # Run assistant in the thread
         run = openai.beta.threads.runs.create(
             thread_id=self.thread_id,
             assistant_id=self.assistant_id
         )
 
-        # Wait for response
         while True:
             run_status = openai.beta.threads.runs.retrieve(thread_id=self.thread_id, run_id=run.id)
             if run_status.status == "completed":
                 messages = openai.beta.threads.messages.list(thread_id=self.thread_id)
                 return messages.data[0].content[0].text.value
-              # Wait before checking again
 

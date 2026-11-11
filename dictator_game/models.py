@@ -11,10 +11,10 @@ def initialize_assistant(self):
 
 class Constants(BaseConstants):
     name_in_url = 'game_pages'
-    players_per_group = None  # No groups since it's asynchronous
-    num_rounds = 30  # Total rounds (3 parts × 10 rounds)
-    endowment = 100  # Amount for Dictator to allocate
-    rounds_per_part = 10  # Number of rounds per part
+    players_per_group = None
+    num_rounds = 30
+    endowment = 100
+    rounds_per_part = 10
 
     @staticmethod
     def get_part(round_number):
@@ -23,20 +23,9 @@ class Constants(BaseConstants):
 
 class Subsession(BaseSubsession):
     pass
-    # aggregated_results = models.LongStringField(blank=True, initial='{}')  # JSON string
 
-    # def creating_session(self):
-    #     for player in self.get_players():
-    #         if player.random_decisions is None:
-    #             player.random_decisions = False
-    #            # print(f"[DEBUG] Initialized random_decisions for Player {player.id_in_group}")
 
-    #         if not player.incorrect_answers or player.incorrect_answers.strip() == "":
-    #             player.incorrect_answers = ''
-    #            # print(f"[DEBUG] Initialized incorrect_answers for Player {player.id_in_group}")
 
-    #         if not player.conversation_history or player.conversation_history.strip() == "":
-    #             player.conversation_history = ''
 
 
 
@@ -47,11 +36,10 @@ class Group(BaseGroup):
 class Player(BasePlayer):
     app_name = models.StringField(initial='LLM_del1st')
     final_allocations = models.LongStringField()
-    conversation_history=models.LongStringField(initial='[]') #new
-    assistant_id = models.StringField(blank=True)  # Allow an empty value
+    conversation_history=models.LongStringField(initial='[]')
+    assistant_id = models.StringField(blank=True)
     prolific_id = models.StringField()
 
-    # Allocation for the current decision (manual or agent-based)
     allocation = models.IntegerField(
         min=0,
         max=100,
@@ -62,11 +50,9 @@ class Player(BasePlayer):
     random_payoff_part=models.IntegerField( blank=True, min=1, max=3 )
 
     random_decisions = models.BooleanField(blank=True)
-    # Tracks the number of failed comprehension attempts
-    comprehension_attempts = models.IntegerField(initial=0) #new
-    incorrect_answers = models.StringField(initial='') #new
+    comprehension_attempts = models.IntegerField(initial=0)
+    incorrect_answers = models.StringField(initial='')
 
-    # Tracks whether the participant is excluded from the study
     is_excluded = models.BooleanField(initial=False)
 
     gender = models.StringField(
@@ -115,12 +101,11 @@ class Player(BasePlayer):
     )
 
     feedback = models.LongStringField(
-        blank=True,                # optional
+        blank=True,
         max_length=1000,
         label="Suggestions / comments for the researchers (optional)",
     )
 
-    # Fields for comprehension test questions
     q1 = models.StringField(
         label="What is your role in this study?",
         choices=['a', 'b', 'c', 'd'],
@@ -172,35 +157,12 @@ class Player(BasePlayer):
         blank=True
     )
 
-    # # Agent allocations for Part 2 (mandatory delegation)
-    # agent_allocation_mandatory_round_1 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_2 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_3 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_4 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_5 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_6 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_7 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_8 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_9 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_mandatory_round_10 = models.IntegerField(min=0, max=100, blank=True)
 
-    # # Track whether the participant chooses to delegate in Part 3
     delegate_decision_optional = models.BooleanField(
         label="Would you like to delegate your decisions to an AI agent for Part 3?",
         blank=True
     ) 
 
-    # # Agent allocations for Part 3 (optional delegation)
-    # agent_allocation_optional_round_1 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_2 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_3 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_4 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_5 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_6 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_7 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_8 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_9 = models.IntegerField(min=0, max=100, blank=True)
-    # agent_allocation_optional_round_10 = models.IntegerField(min=0, max=100, blank=True)
 
     def get_agent_decision_mandatory(self, round_number):
         """Retrieve the agent's allocation for a given round in Part 2."""
